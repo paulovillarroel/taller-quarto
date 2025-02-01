@@ -1,0 +1,135 @@
+---
+title: "Taller de Quarto"
+format:
+  html:
+    toc: true
+    smooth-scroll: true
+    toc-title: "Contenidos"
+    toc-depth: 3
+    toc-expand: true
+    toc-location: left
+    other-links: 
+        - text: Github
+          href: https://github.com/
+    theme: cosmo
+    highlight-style: github
+    code-fold: show
+    code-summary: "Mostrar código"
+    code-tools: true
+    embed-resources: true
+crossref: 
+  fig-title: Fig
+
+---
+
+## Tema 1
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+### Subtema 1
+
+Quarto is a powerful tool for creating dynamic and interactive documents. It allows you to combine text, code, and data to produce polished and professional outputs. With Quarto, you can generate documents in various formats such as HTML, PDF, and MS Word.
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(DT)
+library(plotly)
+```
+
+```{r}
+iris |>
+  head()
+```
+
+### Subtema 2
+
+One of the key features of Quarto is its ability to support multiple programming languages. You can embed code chunks from languages like R, Python, or Julia directly into your document. This makes it an ideal choice for data scientists and researchers who want to create reproducible and transparent reports.
+
+```{r}
+DT::datatable(
+  iris,
+  filter = "top",
+  options = list(
+    orderClasses = FALSE,
+    searching = TRUE,
+    autoWidth = TRUE,
+    pageLength = 15,
+    dom = 'Bfrtip',
+    buttons = c("excel", "csv", "copy"),
+    initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#f8f9fa', 'color': '#2b2d42'});",
+    "}")
+  ),
+  colnames = c("Longitud del sépalo (cm)", "Anchura del sépalo (cm)", "Longitud de la corola (cm)", "Anchura de la corola (cm)", "Especie"),
+  extensions = "Buttons"
+)
+```
+
+
+## Tema 2
+
+### Subtema 3
+
+Quarto also offers a wide range of customization options. You can easily modify the appearance of your document by using themes, CSS styles, or custom templates. This flexibility allows you to tailor your document to meet specific presentation requirements.
+
+```{r}
+#| label: scatter-plot
+#| fig-cap: "Scatter plot of Sepal.Length vs Petal.Length"
+#| chunk-label: scatter-plot
+iris <- iris
+
+iris |> 
+  ggplot(aes(Sepal.Length, Petal.Length)) +
+  geom_point()
+```
+
+### Subtema 4
+
+In addition to its technical capabilities, Quarto provides excellent support for collaborative workflows. You can work on projects with colleagues, track changes, and manage versions seamlessly. This makes it a great tool for team-based projects and academic writing.
+
+::: callout-tip
+This is a tip.
+:::
+
+### Subtema 5
+
+```{r}
+here::here()
+```
+
+```{r}
+list.files(here::here())
+```
+
+![Dua Lipa](images\dua-lipa.jpg)
+
+Another notable feature of Quarto is its integration with popular data science tools. For example, you can directly embed visualizations from libraries like Matplotlib, Seaborn, or Plotly. This ensures that your visualizations are always up-to-date and reflect the latest data.
+
+### Subtema 6
+
+Quarto also supports cross-references, which is particularly useful for longer documents. You can easily reference figures, tables, and equations within your text, improving the readability and coherence of your work.
+
+@fig-scatter-plot 
+
+```{r}
+#| label: fig-scatter-plot
+#| fig-alt: |
+#|   A scatter plot of Sepal.Length vs Petal.Length in the iris dataset.
+
+grafico1 <- iris |> 
+  ggplot(aes(Sepal.Length, Petal.Length, color = Species)) +
+  geom_point(size = 2)
+
+grafico1
+```
+
+```{r}
+ggplotly(grafico1)
+```
+
+## Conclusión
+
+In summary, Quarto is a versatile and robust tool for creating dynamic, interactive, and professionally formatted documents. Its ability to integrate code, data, and text makes it an excellent choice for a wide range of applications, from academic research to business reporting.

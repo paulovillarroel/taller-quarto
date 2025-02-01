@@ -1,0 +1,172 @@
+---
+title: "Reporte de día de estadías hospitalarias"
+subtitle: "Servicio de Salud `r params$glosa_sss`"
+author: "Hazla con Datos"
+date: "1 febrero 2025"
+lang: es
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    toc-expand: true
+    smooth-scroll: true
+execute:
+  echo: false
+  warning: false
+
+params:
+  glosa_sss: "Arica"
+---
+
+::: {.callout-note}
+Los datos de este reporte son extraídos de la [Base de Datos de Indicadores de Establecimientos de Salud (DEIS)](https://deis.minsal.cl/).
+:::
+
+
+El presente informe tiene como objetivo mostrar un análisis detallado de los días de estancia hospitalaria y el índice ocupacional de las distintas instituciones de salud en el Servicio de Salud de `r params$glosa_sss`. Este análisis se basa en los datos extraídos de los Registros Electrónicos de Salud (REM) publicados, los cuales proporcionan una visión integral de la situación actual de las instituciones sanitarias en la región.
+
+La estancia hospitalaria es un indicador clave que refleja la duración promedio de las hospitalizaciones de los pacientes, mientras que el índice ocupacional muestra el porcentaje de camas ocupadas en relación con la capacidad total de las instituciones. Estos indicadores son fundamentales para evaluar la eficiencia en la gestión de recursos hospitalarios, identificar posibles bottle necks en la atención médica y tomar decisiones informadas para optimizar la capacidad de respuesta del sistema de salud.
+
+Este informe no solo presenta los datos actuales, sino que también busca contribuir a la planificación estratégica y al mejoramiento continuo del Servicio de Salud de `r params$glosa_sss`. A través de este análisis, se busca brindar una herramienta útil para los gestores, profesionales de salud y tomadores de decisiones, con el fin de fortalecer la calidad y accesibilidad de la atención médica en la zona.
+
+
+
+## Área de cuidados intensivos
+
+```{r}
+#| label: cargar librerías
+
+library(tidyverse)
+library(DT)
+library(janitor)
+library(readxl)
+```
+
+```{r}
+rem20 <- read_csv2("data/indicadores_rem20.csv") |> 
+    janitor::clean_names()
+
+establecimientos <- readxl::read_excel("data/Establecimientos DEIS.xlsx") |> 
+    janitor::clean_names() |> 
+    select(codigo_vigente, nombre_oficial)
+
+rem20 <- rem20 |> 
+    left_join(establecimientos, by = c("codigo_establecimiento" = "codigo_vigente"))
+```
+
+```{r}
+servicio <- rem20 |> 
+    filter(glosa_sss == params$glosa_sss)
+```
+
+
+### Días de estancia
+
+A continuación se presenta el promedio de días de estadía hospitalaria en el área de cuidados intensivos de `r params$glosa_sss`.
+
+```{r}
+intensivo <- servicio |> 
+    filter(area_funcional == "Área Cuidados Intensivos Adultos")
+```
+
+```{r out.width="100%"}
+#| label: promedio-estadia
+
+intensivo |> 
+    mutate(fecha = paste0(periodo, "-", mes),
+           fecha = zoo::as.yearmon(fecha),
+           promedio_dias_estada = as.numeric(promedio_dias_estada)) |> 
+    ggplot(aes(fecha, promedio_dias_estada)) +
+    geom_line() +
+    stat_smooth(se = FALSE, method = "loess", span = 0.2, color = "blue", linewidth = 1) +
+    theme_minimal() +
+    labs(title = "Promedio de días de estadía hospitalaria\nen área de cuidados intensivos",
+         subtitle = paste("Servicio de Salud de", params$glosa_sss),
+         x = "Fecha",
+         y = "Promedio de días de estadía hospitalaria") +
+    theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+          plot.subtitle = element_text(hjust = 0.5, size = 12),
+          strip.text = element_text(size = 8)) +
+    facet_wrap(~ nombre_oficial, scales = "free_y")
+```
+
+A continuación se presenta el detalles de los días de estadía hospitalaria en el área de cuidados intensivos de `r params$glosa_sss`, por cada centro de salud.
+
+
+```{r}
+intensivo |> 
+    mutate(promedio_dias_estada = as.numeric(promedio_dias_estada),
+           nombre_oficial = factor(nombre_oficial)) |> 
+    select(periodo, mes, nombre_oficial, promedio_dias_estada, letalidad) |> 
+    DT::datatable(
+    filter = "top",
+    options = list(
+    orderClasses = FALSE,
+    searching = TRUE,
+    searchHighlight = TRUE,
+    autoWidth = TRUE,
+    pageLength = 15,
+    dom = 'Bfrtip',
+    buttons = c("excel", "csv", "copy"),
+    initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#f8f9fa', 'color': '#2b2d42'});",
+    "}")
+  ),
+  colnames = c("Año", "Mes", "Establecimiento", "Prom. Días Estada", "Letalidad"),
+  extensions = "Buttons"
+)
+```
+
+
+### Índice Ocupacional
+
+El índice ocupacional es una medida que indica la cantidad de camas ocupadas en relación con el total de camas disponibles en un establecimiento de salud. Este índice es útil para evaluar la capacidad de un hospital para atender a sus pacientes y para identificar posibles problemas de capacidad en el futuro.
+
+```{r out.width="100%"}
+#| label: indice-ocupacional
+
+intensivo |> 
+    mutate(fecha = paste0(periodo, "-", mes),
+           fecha = zoo::as.yearmon(fecha),
+           indice_ocupacional = as.numeric(indice_ocupacional)) |> 
+    ggplot(aes(fecha, indice_ocupacional)) +
+    geom_line() +
+    stat_smooth(se = FALSE, method = "loess", span = 0.2, color = "blue", linewidth = 1) +
+    theme_minimal() +
+    labs(title = "Evolución del índice Ocupacional\nen área de cuidados intensivos",
+         subtitle = paste("Servicio de Salud de", params$glosa_sss),
+         x = "Fecha",
+         y = "Índice Ocupacional") +
+    theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+          plot.subtitle = element_text(hjust = 0.5, size = 12),
+          strip.text = element_text(size = 8)) +
+    facet_wrap(~ nombre_oficial, scales = "free_y")
+```
+
+Veamos la tabla de datos:
+
+```{r}
+intensivo |> 
+    mutate(nombre_oficial = factor(nombre_oficial)) |> 
+    select(periodo, mes, nombre_oficial, indice_ocupacional) |> 
+    DT::datatable(
+    filter = "top",
+    options = list(
+    orderClasses = FALSE,
+    searching = TRUE,
+    searchHighlight = TRUE,
+    autoWidth = TRUE,
+    pageLength = 15,
+    dom = 'Bfrtip',
+    buttons = c("excel", "csv", "copy"),
+    initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#f8f9fa', 'color': '#2b2d42'});",
+    "}")
+  ),
+  colnames = c("Año", "Mes", "Establecimiento", "Índice Ocupacional"),
+  extensions = "Buttons"
+)
+```
