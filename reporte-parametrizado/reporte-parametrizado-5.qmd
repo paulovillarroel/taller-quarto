@@ -51,7 +51,13 @@ establecimientos <- readxl::read_excel("data/Establecimientos DEIS.xlsx") |>
     select(codigo_vigente, nombre_oficial)
 
 rem20 <- rem20 |> 
-    left_join(establecimientos, by = c("codigo_establecimiento" = "codigo_vigente"))
+    left_join(establecimientos, by = c("codigo_establecimiento" = "codigo_vigente")) |> 
+    mutate(glosa_sss = case_when(
+      glosa_sss == "Arica" ~ "Arica y Parinacota",
+      glosa_sss == "Iquique" ~ "Tarapacá",
+      glosa_sss == "Valdivia" ~ "Los Ríos",
+      .default = glosa_sss
+    ))
 ```
 
 ```{r}
@@ -67,6 +73,29 @@ A continuación se presenta el promedio de días de estadía hospitalaria en el 
 area <- servicio |> 
     filter(area_funcional == params$area_funcional)
 ```
+
+```{r}
+max_anio <- max(area$periodo)
+
+datos_area <- area |> 
+    filter(periodo == max_anio) |> 
+    mutate(promedio_dias_estada = as.numeric(promedio_dias_estada)) |> 
+    summarize(media = mean(promedio_dias_estada, na.rm = TRUE),
+              desv_est = sd(promedio_dias_estada, na.rm = TRUE))
+
+max_estadia <- area |> 
+    filter(periodo == max_anio) |>
+    group_by(nombre_oficial) |> 
+    mutate(promedio_dias_estada = as.numeric(promedio_dias_estada)) |> 
+    summarize(media = mean(promedio_dias_estada, na.rm = TRUE)) |> 
+    arrange(desc(media)) |> 
+    slice(1)
+
+```
+
+Para el último año disponible (`r max_anio`), el promedio de días de estadía hospitalaria en el `r params$area_funcional` del `r params$glosa_sss` fue de `r round(datos_area$media, 1)` días (con una desviación estándar de `r round(datos_area$desv_est, 1)`). El establecimiento con el mayor promedio de días de estadía hospitalaria es el `r max_estadia$nombre_oficial` con `r round(max_estadia$media, 1)` días.
+\
+A continuación revisemos la evolución de este indicador a lo largo del tiempo.\
 
 ```{r out.width="100%"}
 #| label: promedio-estadia

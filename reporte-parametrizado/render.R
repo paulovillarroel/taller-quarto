@@ -1,8 +1,8 @@
 library(tidyverse)
 library(readxl)
 library(janitor)
-library(glue)
-library(quarto)
+library(glue) #install.packages("glue")
+library(quarto) #install.packages("quarto")
 
 rem20 <- read_csv2("data/indicadores_rem20.csv") |> 
     janitor::clean_names()
@@ -12,7 +12,13 @@ establecimientos <- readxl::read_excel("data/Establecimientos DEIS.xlsx") |>
     select(codigo_vigente, nombre_oficial)
 
 rem20 <- rem20 |> 
-    left_join(establecimientos, by = c("codigo_establecimiento" = "codigo_vigente"))
+  left_join(establecimientos, by = c("codigo_establecimiento" = "codigo_vigente")) |> 
+  mutate(glosa_sss = case_when(
+    glosa_sss == "Arica" ~ "Arica y Parinacota",
+    glosa_sss == "Iquique" ~ "Tarapacá",
+    glosa_sss == "Valdivia" ~ "Los Ríos",
+    .default = glosa_sss
+  ))
 
 
 # Renderizar los reportes ----
@@ -48,7 +54,7 @@ reportes2 <- rem20 |>
   mutate(across(everything(), as.character))
 
 
-reportes_sample <- reportes2 |> head(3)
+reportes_sample <- reportes2 |> head(10)
 
 # Renderizar reportes
 purrr::walk2(

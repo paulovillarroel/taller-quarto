@@ -63,14 +63,14 @@ arica <- rem20 |>
 A continuación se presenta el promedio de días de estadía hospitalaria en el área de cuidados intensivos de Arica.
 
 ```{r}
-arica_intesivo <- arica |> 
+arica_intensivo <- arica |> 
     filter(area_funcional == "Área Cuidados Intensivos Adultos")
 ```
 
 ```{r out.width="100%"}
 #| label: promedio-estadia
 
-arica_intesivo |> 
+arica_intensivo |> 
     mutate(fecha = paste0(periodo, "-", mes),
            fecha = zoo::as.yearmon(fecha),
            promedio_dias_estada = as.numeric(promedio_dias_estada)) |> 
@@ -92,7 +92,7 @@ A continuación se presenta el detalles de los días de estadía hospitalaria en
 
 
 ```{r}
-arica_intesivo |> 
+arica_intensivo |> 
     mutate(promedio_dias_estada = as.numeric(promedio_dias_estada),
            nombre_oficial = factor(nombre_oficial)) |> 
     select(periodo, mes, nombre_oficial, promedio_dias_estada, letalidad) |> 
@@ -124,7 +124,7 @@ El índice ocupacional es una medida que indica la cantidad de camas ocupadas en
 ```{r out.width="100%"}
 #| label: indice-ocupacional
 
-arica_intesivo |> 
+arica_intensivo |> 
     mutate(fecha = paste0(periodo, "-", mes),
            fecha = zoo::as.yearmon(fecha),
            indice_ocupacional = as.numeric(indice_ocupacional)) |> 
@@ -145,7 +145,7 @@ arica_intesivo |>
 Veamos la tabla de datos:
 
 ```{r}
-arica_intesivo |> 
+arica_intensivo |> 
     mutate(nombre_oficial = factor(nombre_oficial)) |> 
     select(periodo, mes, nombre_oficial, indice_ocupacional) |> 
     DT::datatable(

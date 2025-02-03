@@ -17,7 +17,7 @@ execute:
   warning: false
 
 params:
-  glosa_sss: "Valparaíso San Antonio"
+  glosa_sss: "Concepción"
 ---
 
 ::: {.callout-note}

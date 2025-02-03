@@ -17,9 +17,10 @@ format:
     code-summary: "Mostrar código"
     code-tools: true
     embed-resources: true
+
 crossref: 
   fig-title: Fig
-
+bibliography: references.bib
 ---
 
 ## Tema 1
@@ -68,7 +69,6 @@ DT::datatable(
 )
 ```
 
-
 ## Tema 2
 
 ### Subtema 3
@@ -106,13 +106,13 @@ list.files(here::here())
 
 ![Dua Lipa](images\dua-lipa.jpg)
 
-Another notable feature of Quarto is its integration with popular data science tools. For example, you can directly embed visualizations from libraries like Matplotlib, Seaborn, or Plotly. This ensures that your visualizations are always up-to-date and reflect the latest data.
+Another notable feature of Quarto is its integration with popular data science tools. For example, you can directly embed visualizations from libraries like Matplotlib, Seaborn, or Plotly. This ensures that your visualizations are always [@bishara1983]up-to-date and reflect the latest data.
 
 ### Subtema 6
 
 Quarto also supports cross-references, which is particularly useful for longer documents. You can easily reference figures, tables, and equations within your text, improving the readability and coherence of your work.
 
-@fig-scatter-plot 
+@fig-scatter-plot
 
 ```{r}
 #| label: fig-scatter-plot
